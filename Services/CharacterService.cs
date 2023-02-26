@@ -31,22 +31,28 @@ namespace Dotnet_Rpg.Services.CharacterService
 
         public async Task<ResponseService<List<Character>>> GetAllCharacters()
         {
-            return new ResponseService<List<Character>>
+			var res = new ResponseService<List<Character>>
             {
                 Data = characters,
                 Message = "List of characters"
             };
+            return res;
         }
 
         public async Task<ResponseService<Character>> GetCharacterById(int id)
         {
             var character = characters.FirstOrDefault(c => c.Id == id);
-            if (character is null)
-                throw new Exception("Character is not found");
-            return new ResponseService<Character>{
-				Data = character,
+			var res = new ResponseService<Character>
+            {
+                Data = character,
 				Message = "Data for single character"
-			};
+            };
+            if (character is null)
+			{
+				res.Message = "Character is not found";
+				res.Success = false;
+			}
+            return res;
         }
     }
 }

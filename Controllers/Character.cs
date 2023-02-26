@@ -24,7 +24,8 @@ namespace Dotnet_Rpg.Controllers
         [HttpGet("{id}")]
         public async Task <ActionResult<ResponseService<Character>>> GetSingleCharacter(int id)
         {
-            return Ok(await _characterService.GetCharacterById(id));
+			var data = await _characterService.GetCharacterById(id);
+            return data.Success ? Ok(data) : NotFound(data);
         }
 
         [HttpPost]
