@@ -19,23 +19,34 @@ namespace Dotnet_Rpg.Services.CharacterService
             new Character { Id = 2, Name = "Jack" }
         };
 
-        public async Task<List<Character>> AddCharacter(Character newCharacter)
+        public async Task<ResponseService<List<Character>>> AddCharacter(Character newCharacter)
         {
-			characters.Add(newCharacter);
-            return characters;
+            characters.Add(newCharacter);
+            return new ResponseService<List<Character>>
+            {
+                Data = characters,
+                Message = $"Character with id:{newCharacter.Id} is now added"
+            };
         }
 
-        public async Task<List<Character>> GetAllCharacters()
+        public async Task<ResponseService<List<Character>>> GetAllCharacters()
         {
-            return characters;
+            return new ResponseService<List<Character>>
+            {
+                Data = characters,
+                Message = "List of characters"
+            };
         }
 
-        public async Task<Character> GetCharacterById(int id)
+        public async Task<ResponseService<Character>> GetCharacterById(int id)
         {
             var character = characters.FirstOrDefault(c => c.Id == id);
-			if (character is null)
-				throw new Exception("Character is not found");
-			return character;
+            if (character is null)
+                throw new Exception("Character is not found");
+            return new ResponseService<Character>{
+				Data = character,
+				Message = "Data for single character"
+			};
         }
     }
 }
