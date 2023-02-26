@@ -1,3 +1,4 @@
+using Dotnet_Rpg.Dtos.Character;
 using Dotnet_Rpg.Models;
 using Dotnet_Rpg.Services.CharacterService;
 using Microsoft.AspNetCore.Mvc;
@@ -16,20 +17,20 @@ namespace Dotnet_Rpg.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ResponseService<List<Character>>>> GetAllCharacters()
+        public async Task<ActionResult<ResponseService<List<GetCharacterDto>>>> GetAllCharacters()
         {
             return Ok(await _characterService.GetAllCharacters());
         }
 
         [HttpGet("{id}")]
-        public async Task <ActionResult<ResponseService<Character>>> GetSingleCharacter(int id)
+        public async Task <ActionResult<ResponseService<GetCharacterDto>>> GetSingleCharacter(int id)
         {
 			var data = await _characterService.GetCharacterById(id);
             return data.Success ? Ok(data) : NotFound(data);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ResponseService<List<Character>>>> AddCharacter(Character character)
+        public async Task<ActionResult<ResponseService<List<GetCharacterDto>>>> AddCharacter(AddCharacterDto character)
         {
 			return Ok(await _characterService.AddCharacter(character));
         }

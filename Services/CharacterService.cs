@@ -1,9 +1,18 @@
+using AutoMapper;
+using Dotnet_Rpg.Dtos.Character;
 using Dotnet_Rpg.Models;
 
 namespace Dotnet_Rpg.Services.CharacterService
 {
     public class CharacterService : ICharacterService
     {
+        private readonly IMapper _mapper;
+
+        public CharacterService(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
+
         private static List<Character> characters = new List<Character>
         {
             new Character
@@ -19,39 +28,44 @@ namespace Dotnet_Rpg.Services.CharacterService
             new Character { Id = 2, Name = "Jack" }
         };
 
-        public async Task<ResponseService<List<Character>>> AddCharacter(Character newCharacter)
+        public async Task<ResponseService<List<GetCharacterDto>>> AddCharacter(
+            AddCharacterDto newCharacter
+        )
         {
-            characters.Add(newCharacter);
-            return new ResponseService<List<Character>>
+            var character = _mapper.Map<Character>(newCharacter);
+            character.Id = characters.Max(c => c.Id) + 1;
+
+            characters.Add(character);
+            return new ResponseService<List<GetCharacterDto>>
             {
-                Data = characters,
-                Message = $"Character with id:{newCharacter.Id} is now added"
+                Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList(),
+                Message = $"Character with id:{character.Id} is now added"
             };
         }
 
-        public async Task<ResponseService<List<Character>>> GetAllCharacters()
+        public async Task<ResponseService<List<GetCharacterDto>>> GetAllCharacters()
         {
-			var res = new ResponseService<List<Character>>
+            var res = new ResponseService<List<GetCharacterDto>>
             {
-                Data = characters,
+                Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList(),
                 Message = "List of characters"
             };
             return res;
         }
 
-        public async Task<ResponseService<Character>> GetCharacterById(int id)
+        public async Task<ResponseService<GetCharacterDto>> GetCharacterById(int id)
         {
             var character = characters.FirstOrDefault(c => c.Id == id);
-			var res = new ResponseService<Character>
+            var res = new ResponseService<GetCharacterDto>
             {
-                Data = character,
-				Message = "Data for single character"
+                Data = _mapper.Map<GetCharacterDto>(character),
+                Message = "Data for single character"
             };
             if (character is null)
-			{
-				res.Message = "Character is not found";
-				res.Success = false;
-			}
+            {
+                res.Message = "Character is not found";
+                res.Success = false;
+            }
             return res;
         }
     }
