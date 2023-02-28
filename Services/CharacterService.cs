@@ -68,5 +68,51 @@ namespace Dotnet_Rpg.Services.CharacterService
             }
             return res;
         }
+
+        public async Task<ResponseService<GetCharacterDto>> UpdateCharacter(
+            int id,
+            UpdateCharacterDto updatedCharacter
+        )
+        {
+            var character = characters.FirstOrDefault(c => c.Id == id);
+            var res = new ResponseService<GetCharacterDto> { };
+            if (character is null)
+            {
+                res.Message = "Character is not found";
+                res.Success = false;
+                return res;
+            }
+
+            character.Name = updatedCharacter.Name;
+            character.Class = updatedCharacter.Class;
+            character.Defense = updatedCharacter.Defense;
+            character.HitPoints = updatedCharacter.HitPoints;
+            character.Intelligence = updatedCharacter.Intelligence;
+            character.Strength = updatedCharacter.Strength;
+
+            res.Data = _mapper.Map<GetCharacterDto>(character);
+            res.Message = "Data for single character";
+
+            return res;
+        }
+
+        public async Task<ResponseService<List<GetCharacterDto>>> DeleteCharacter(int id)
+        {
+            var character = characters.FirstOrDefault(c => c.Id == id);
+            var res = new ResponseService<List<GetCharacterDto>> { };
+            if (character is null)
+            {
+                res.Message = "Character is not found";
+                res.Success = false;
+                return res;
+            }
+
+            characters.Remove(character);
+
+            res.Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+            res.Message = $"List of characters after deletion character with id {id}";
+
+			return res;
+        }
     }
 }
