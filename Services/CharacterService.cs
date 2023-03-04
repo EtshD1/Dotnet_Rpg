@@ -1,53 +1,47 @@
 using AutoMapper;
+using Dotnet_Rpg.Data;
 using Dotnet_Rpg.Dtos.Character;
 using Dotnet_Rpg.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dotnet_Rpg.Services.CharacterService
 {
     public class CharacterService : ICharacterService
     {
         private readonly IMapper _mapper;
+        private readonly DataContext _context;
 
-        public CharacterService(IMapper mapper)
+        public CharacterService(IMapper mapper, DataContext context)
         {
             _mapper = mapper;
+            _context = context;
         }
 
-        private static List<Character> characters = new List<Character>
-        {
-            new Character
-            {
-                Id = 1,
-                Name = "Nate",
-                Class = RpgClass.Mage,
-                Defense = 8,
-                Strength = 8,
-                HitPoints = 110,
-                Intelligence = 20
-            },
-            new Character { Id = 2, Name = "Jack" }
-        };
-
-        public async Task<ResponseService<List<GetCharacterDto>>> AddCharacter(
+        public async Task<ResponseService<GetCharacterDto>> AddCharacter(
             AddCharacterDto newCharacter
         )
         {
             var character = _mapper.Map<Character>(newCharacter);
-            character.Id = characters.Max(c => c.Id) + 1;
 
-            characters.Add(character);
-            return new ResponseService<List<GetCharacterDto>>
+			_context.Characters.Add(character);
+			await _context.SaveChangesAsync();
+
+            return new ResponseService<GetCharacterDto>
             {
-                Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList(),
+                Data = _mapper.Map<GetCharacterDto>(character),
                 Message = $"Character with id:{character.Id} is now added"
             };
         }
 
         public async Task<ResponseService<List<GetCharacterDto>>> GetAllCharacters()
         {
+			var characters = await _context.Characters
+				.Select(c => _mapper.Map<GetCharacterDto>(c))
+				.ToListAsync();
+
             var res = new ResponseService<List<GetCharacterDto>>
             {
-                Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList(),
+                Data = characters,
                 Message = "List of characters"
             };
             return res;
@@ -55,7 +49,7 @@ namespace Dotnet_Rpg.Services.CharacterService
 
         public async Task<ResponseService<GetCharacterDto>> GetCharacterById(int id)
         {
-            var character = characters.FirstOrDefault(c => c.Id == id);
+            var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
             var res = new ResponseService<GetCharacterDto>
             {
                 Data = _mapper.Map<GetCharacterDto>(character),
@@ -74,7 +68,7 @@ namespace Dotnet_Rpg.Services.CharacterService
             UpdateCharacterDto updatedCharacter
         )
         {
-            var character = characters.FirstOrDefault(c => c.Id == id);
+            var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
             var res = new ResponseService<GetCharacterDto> { };
             if (character is null)
             {
@@ -98,7 +92,7 @@ namespace Dotnet_Rpg.Services.CharacterService
 
         public async Task<ResponseService<List<GetCharacterDto>>> DeleteCharacter(int id)
         {
-            var character = characters.FirstOrDefault(c => c.Id == id);
+            var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
             var res = new ResponseService<List<GetCharacterDto>> { };
             if (character is null)
             {
@@ -107,9 +101,10 @@ namespace Dotnet_Rpg.Services.CharacterService
                 return res;
             }
 
-            characters.Remove(character);
+            _context.Characters.Remove(character);
+			await _context.SaveChangesAsync();
 
-            res.Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+            res.Data = _context.Characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
             res.Message = $"List of characters after deletion character with id {id}";
 
 			return res;
