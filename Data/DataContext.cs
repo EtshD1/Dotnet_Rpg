@@ -7,6 +7,7 @@ namespace Dotnet_Rpg.Data
     {
         public DbSet<Character> Characters => Set<Character>();
         public DbSet<User> Users => Set<User>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public DataContext(DbContextOptions<DataContext> options)
             : base(options) { }

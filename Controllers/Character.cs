@@ -1,6 +1,7 @@
 using Dotnet_Rpg.Dtos.Character;
 using Dotnet_Rpg.Models;
 using Dotnet_Rpg.Services.CharacterService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet_Rpg.Controllers
@@ -17,12 +18,14 @@ namespace Dotnet_Rpg.Controllers
         }
 
         [HttpGet]
+		[Authorize]
         public async Task<ActionResult<ResponseService<List<GetCharacterDto>>>> GetAllCharacters()
         {
             return Ok(await _characterService.GetAllCharacters());
         }
 
         [HttpGet("{id}")]
+		[Authorize]
         public async Task <ActionResult<ResponseService<GetCharacterDto>>> GetSingleCharacter(int id)
         {
 			var data = await _characterService.GetCharacterById(id);
@@ -30,12 +33,14 @@ namespace Dotnet_Rpg.Controllers
         }
 
         [HttpPost]
+		[Authorize]
         public async Task<ActionResult<ResponseService<List<GetCharacterDto>>>> AddCharacter(AddCharacterDto character)
         {
 			return Ok(await _characterService.AddCharacter(character));
         }
 
         [HttpPatch("{id}")]
+		[Authorize]
         public async Task<ActionResult<ResponseService<GetCharacterDto>>> UpdateCharacter(int id, UpdateCharacterDto updatedCharacter)
         {
             var data = await _characterService.UpdateCharacter(id, updatedCharacter);
@@ -43,6 +48,7 @@ namespace Dotnet_Rpg.Controllers
         }
 
         [HttpDelete("{id}")]
+		[Authorize]
         public async Task<ActionResult<ResponseService<GetCharacterDto>>> DeleteCharacter(int id)
         {
             var data = await _characterService.DeleteCharacter(id);
